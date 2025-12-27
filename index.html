@@ -3,92 +3,452 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hacker Clicker</title>
+    <title>Hacker Life OS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* --- СТИЛИ (CSS) --- */
+        :root { --main-color: #0f0; --bg-color: #050505; --panel-bg: #111; }
         body {
-            background-color: #111;
-            color: #0f0;
+            background-color: var(--bg-color);
+            color: var(--main-color);
             font-family: 'Courier New', Courier, monospace;
+            margin: 0; padding: 10px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            user-select: none; /* Чтобы текст не выделялся при кликах */
+            height: 95vh;
+            user-select: none;
         }
-        h1 { margin-bottom: 10px; font-size: 24px; }
-        .score { font-size: 40px; font-weight: bold; margin-bottom: 30px; }
-        
-        #hack-btn {
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, #005500 0%, #002200 100%);
-            border: 4px solid #0f0;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 24px;
+
+        /* Верхняя панель статистики */
+        .stats-bar {
+            background: var(--panel-bg);
+            border: 1px solid var(--main-color);
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        /* Основной экран контента */
+        .screen {
+            flex-grow: 1;
+            border: 1px solid #004400;
+            padding: 15px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            background: rgba(0, 20, 0, 0.5);
+            display: none; /* Скрываем все экраны по умолчанию */
+        }
+        .screen.active { display: block; } /* Показываем активный */
+
+        /* Кнопки управления (Меню) */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            background: #002200;
+            color: var(--main-color);
+            border: 1px solid var(--main-color);
+            padding: 15px;
+            font-family: inherit;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 0 20px #0f0;
-            transition: transform 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-transform: uppercase;
+            touch-action: manipulation;
         }
-        #hack-btn:active {
-            transform: scale(0.95);
-            background: #003300;
+        button:active { background: var(--main-color); color: black; }
+        button.back-btn { border-color: #f00; color: #f00; }
+
+        /* Элементы внутри экранов */
+        .progress-bar {
+            width: 100%; background: #333; height: 20px; margin-top: 10px;
+            position: relative;
         }
-        .info { margin-top: 20px; color: #888; font-size: 14px; text-align: center; }
+        .progress-fill {
+            height: 100%; background: var(--main-color); width: 0%;
+            transition: width 0.1s;
+        }
+        .item-row {
+            display: flex; justify-content: space-between;
+            border-bottom: 1px solid #333; padding: 8px 0;
+        }
+        input {
+            background: black; border: 1px solid var(--main-color);
+            color: var(--main-color); padding: 5px; width: 80px;
+            font-family: inherit;
+        }
+        h2 { border-bottom: 1px solid var(--main-color); margin-top: 0; }
+        
+        .log-entry { font-size: 12px; margin-bottom: 4px; opacity: 0.8; }
+        #console-log { height: 100px; overflow-y: scroll; border-top: 1px dashed #0f0; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>ВЗЛОМ СИСТЕМЫ</h1>
-    <div class="score">Найдено: <span id="counter">0</span>$</div>
+    <div class="stats-bar">
+        <div id="stat-money">💵 0$</div>
+        <div id="stat-bank">🏦 0$</div>
+        <div id="stat-btc">₿ 0.0000</div>
+        <div id="stat-energy">⚡ 100%</div>
+    </div>
 
-    <div id="hack-btn" onclick="clickBtn()">HACK</div>
+    <div id="screen-main" class="screen active">
+        <h2>TERMINAL_OS v2.0</h2>
+        <p>Добро пожаловать, <span id="username">Hacker</span>.</p>
+        <p>Выберите модуль для запуска...</p>
+        <div id="console-log"></div>
+    </div>
 
-    <div class="info">
-        Накликай деньги и нажми<br>
-        "Отправить" внизу, чтобы забрать!
+    <div id="screen-work" class="screen">
+        <h2>💻 Фриланс</h2>
+        <p id="project-name">Нет проекта</p>
+        <div class="progress-bar"><div id="work-progress" class="progress-fill"></div></div>
+        <br>
+        <button onclick="clickWork()" style="width:100%">🔨 КОДИТЬ (TAP)</button>
+        <br><br>
+        <p style="font-size: 12px; color: #888">Тапай быстро, чтобы заполнить шкалу!</p>
+    </div>
+
+    <div id="screen-bank" class="screen">
+        <h2>🏦 Swiss Bank</h2>
+        <p>На счете: <b id="bank-val">0$</b></p>
+        <div class="item-row">
+            <span>Депозит:</span>
+            <input type="number" id="dep-amount" placeholder="100">
+            <button onclick="bankOp('dep')">📥</button>
+        </div>
+        <div class="item-row">
+            <span>Снять:</span>
+            <input type="number" id="with-amount" placeholder="100">
+            <button onclick="bankOp('with')">📤</button>
+        </div>
+    </div>
+
+    <div id="screen-crypto" class="screen">
+        <h2>📈 Crypto Exchange</h2>
+        <p>Курс BTC: <b id="btc-rate">50000</b>$</p>
+        <p>Ваши BTC: <b id="btc-val">0.0000</b></p>
+        <div class="item-row">
+            <button onclick="tradeBtc('buy')">📉 Купить (0.1)</button>
+            <button onclick="tradeBtc('sell')">📈 Продать (0.1)</button>
+        </div>
+        <div class="item-row">
+            <span>Майнеры: <b id="miner-count">0</b></span>
+            <button onclick="buyMiner()">⛏ Купить (2000$)</button>
+        </div>
+    </div>
+
+    <div id="screen-shop" class="screen">
+        <h2>🛒 DarkNet Market</h2>
+        <div id="shop-list"></div>
+    </div>
+
+    <div id="screen-inventory" class="screen">
+        <h2>🎒 Рюкзак</h2>
+        <div id="inventory-list">Пусто...</div>
+    </div>
+
+    <div id="screen-pvp" class="screen">
+        <h2>💀 PvP Hacking</h2>
+        <p id="pvp-status">Поиск цели...</p>
+        <div id="hack-controls" style="display:none">
+            <div class="progress-bar"><div id="hack-progress" class="progress-fill" style="background:red"></div></div>
+            <br>
+            <button onclick="doHack()" style="width:100%; border-color:red; color:red">💀 BRUTE FORCE</button>
+        </div>
+        <button id="btn-search-victim" onclick="startPvp()">📡 Найти жертву</button>
+    </div>
+
+    <div class="controls" id="main-controls">
+        <button onclick="nav('work')">💻 Работа</button>
+        <button onclick="nav('bank')">🏦 Банк</button>
+        <button onclick="nav('crypto')">📈 Крипто</button>
+        <button onclick="nav('shop')">🛒 Магазин</button>
+        <button onclick="nav('inventory')">🎒 Рюкзак</button>
+        <button onclick="nav('pvp')">💀 PvP</button>
+    </div>
+    
+    <div class="controls" id="back-controls" style="display:none; margin-top: 10px;">
+        <button class="back-btn" onclick="nav('main')">🔙 MENU</button>
+        <button onclick="saveAndClose()">💾 SAVE & EXIT</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрыть на весь экран
+        tg.expand();
 
-        // Настройка главной кнопки (MainButton)
-        tg.MainButton.textColor = "#FFFFFF";
-        tg.MainButton.color = "#008800";
-        tg.MainButton.text = "ЗАБРАТЬ ДЕНЬГИ";
+        // --- ДАННЫЕ ИГРОКА (По умолчанию) ---
+        let player = {
+            money: 500,
+            bank: 0,
+            btc: 0.0,
+            energy: 100,
+            miners: 0,
+            inventory: {},
+            project: null
+        };
 
-        let score = 0;
+        // Товары
+        const ITEMS = {
+            "coffee": {name: "Кофе", price: 40, energy: 30},
+            "sandwich": {name: "Сэндвич", price: 90, energy: 60},
+            "pizza": {name: "Пицца", price: 200, energy: 100},
+            "server": {name: "Сервер", price: 1000, energy: 0}
+        };
 
-        function clickBtn() {
-            score += randomInt(1, 5); // Даем от 1 до 5 долларов за клик
-            document.getElementById('counter').innerText = score;
+        let btcRate = 50000;
 
-            // Показываем кнопку отправки, если накликали > 0
-            if (score > 0 && !tg.MainButton.isVisible) {
-                tg.MainButton.show();
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        function init() {
+            // Если бот передал данные при открытии (в будущем можно реализовать через URL параметры)
+            // Пока работаем локально.
+            updateUI();
+            renderShop();
+            
+            // Запускаем тик таймера (энергия, курс, майнинг)
+            setInterval(tick, 2000);
+            log("System started. Welcome.");
+        }
+
+        // --- НАВИГАЦИЯ ---
+        function nav(screenId) {
+            // Скрываем все экраны
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            // Показываем нужный
+            document.getElementById('screen-' + screenId).classList.add('active');
+
+            // Управление кнопками меню
+            if (screenId === 'main') {
+                document.getElementById('main-controls').style.display = 'grid';
+                document.getElementById('back-controls').style.display = 'none';
+            } else {
+                document.getElementById('main-controls').style.display = 'none';
+                document.getElementById('back-controls').style.display = 'grid';
             }
             
-            // Вибрация при клике (работает на телефонах)
-            tg.HapticFeedback.impactOccurred('light');
+            updateUI();
         }
 
-        // Отправка данных боту при нажатии на большую кнопку "ЗАБРАТЬ"
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
-            let data = JSON.stringify({amount: score});
+        // --- ОБНОВЛЕНИЕ UI ---
+        function updateUI() {
+            document.getElementById('stat-money').innerText = `💵 ${Math.floor(player.money)}$`;
+            document.getElementById('stat-bank').innerText = `🏦 ${Math.floor(player.bank)}$`;
+            document.getElementById('stat-btc').innerText = `₿ ${player.btc.toFixed(4)}`;
+            document.getElementById('stat-energy').innerText = `⚡ ${Math.floor(player.energy)}%`;
+            
+            // Банк
+            document.getElementById('bank-val').innerText = `${Math.floor(player.bank)}$`;
+            // Крипта
+            document.getElementById('btc-val').innerText = player.btc.toFixed(4);
+            document.getElementById('btc-rate').innerText = btcRate;
+            document.getElementById('miner-count').innerText = player.miners;
+            // Инвентарь
+            renderInventory();
+        }
+
+        function log(msg) {
+            let con = document.getElementById('console-log');
+            let time = new Date().toLocaleTimeString().split(' ')[0];
+            con.innerHTML = `<div class="log-entry">[${time}] ${msg}</div>` + con.innerHTML;
+        }
+
+        // --- ЛОГИКА: РАБОТА ---
+        let workProg = 0;
+        function clickWork() {
+            if (player.energy < 1) { log("Error: Low Energy"); return; }
+            
+            player.energy -= 1;
+            workProg += 5; // Прогресс за клик
+            
+            // Визуал
+            document.getElementById('work-progress').style.width = workProg + "%";
+            
+            if (workProg >= 100) {
+                let reward = Math.floor(Math.random() * 50) + 50;
+                player.money += reward;
+                workProg = 0;
+                document.getElementById('work-progress').style.width = "0%";
+                log(`Job done. Earned: ${reward}$`);
+                tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+            updateUI();
+        }
+
+        // --- ЛОГИКА: БАНК ---
+        function bankOp(type) {
+            let inp = type === 'dep' ? document.getElementById('dep-amount') : document.getElementById('with-amount');
+            let val = parseInt(inp.value);
+            if (!val || val <= 0) return;
+
+            if (type === 'dep') {
+                if (player.money >= val) {
+                    player.money -= val; player.bank += val;
+                    log(`Deposited ${val}$`);
+                } else log("No cash");
+            } else {
+                if (player.bank >= val) {
+                    player.bank -= val; player.money += val;
+                    log(`Withdrew ${val}$`);
+                } else log("No funds in bank");
+            }
+            inp.value = "";
+            updateUI();
+        }
+
+        // --- ЛОГИКА: КРИПТА ---
+        function tradeBtc(type) {
+            let cost = btcRate * 0.1;
+            if (type === 'buy') {
+                if (player.money >= cost) {
+                    player.money -= cost; player.btc += 0.1;
+                    log("Bought 0.1 BTC");
+                }
+            } else {
+                if (player.btc >= 0.1) {
+                    player.btc -= 0.1; player.money += cost;
+                    log("Sold 0.1 BTC");
+                }
+            }
+            updateUI();
+        }
+
+        function buyMiner() {
+            if (player.money >= 2000) {
+                player.money -= 2000; player.miners++;
+                log("Miner installed");
+                updateUI();
+            }
+        }
+
+        // --- ЛОГИКА: МАГАЗИН И ИНВЕНТАРЬ ---
+        function renderShop() {
+            let html = "";
+            for (let k in ITEMS) {
+                let item = ITEMS[k];
+                html += `<div class="item-row">
+                    <span>${item.name} (+${item.energy}⚡)</span>
+                    <button onclick="buyItem('${k}')" style="padding:5px; font-size:12px">${item.price}$</button>
+                </div>`;
+            }
+            document.getElementById('shop-list').innerHTML = html;
+        }
+
+        function buyItem(key) {
+            let item = ITEMS[key];
+            if (player.money >= item.price) {
+                player.money -= item.price;
+                player.inventory[key] = (player.inventory[key] || 0) + 1;
+                log(`Bought ${item.name}`);
+                updateUI();
+            } else log("Need money");
+        }
+
+        function renderInventory() {
+            let html = "";
+            let isEmpty = true;
+            for (let k in player.inventory) {
+                if (player.inventory[k] > 0) {
+                    isEmpty = false;
+                    html += `<div class="item-row">
+                        <span>${ITEMS[k].name} (x${player.inventory[k]})</span>
+                        <button onclick="useItem('${k}')" style="padding:5px; font-size:12px">EAT</button>
+                    </div>`;
+                }
+            }
+            document.getElementById('inventory-list').innerHTML = isEmpty ? "Пусто..." : html;
+        }
+
+        function useItem(key) {
+            if (player.inventory[key] > 0) {
+                player.inventory[key]--;
+                player.energy = Math.min(100, player.energy + ITEMS[key].energy);
+                log(`Used ${ITEMS[key].name}`);
+                updateUI();
+            }
+        }
+
+        // --- ЛОГИКА: PVP (Симуляция) ---
+        let hackProg = 0;
+        let pvpActive = false;
+        
+        function startPvp() {
+            document.getElementById('btn-search-victim').style.display = 'none';
+            document.getElementById('pvp-status').innerText = "Поиск IP...";
+            
+            setTimeout(() => {
+                document.getElementById('pvp-status').innerText = "Цель: User_" + Math.floor(Math.random()*1000);
+                document.getElementById('hack-controls').style.display = 'block';
+                hackProg = 0;
+                pvpActive = true;
+                document.getElementById('hack-progress').style.width = "0%";
+            }, 1500);
+        }
+
+        function doHack() {
+            if (!pvpActive) return;
+            if (player.energy < 2) return;
+            player.energy -= 2;
+            
+            hackProg += 10;
+            document.getElementById('hack-progress').style.width = hackProg + "%";
+            tg.HapticFeedback.impactOccurred('medium');
+
+            if (hackProg >= 100) {
+                let stolen = Math.floor(Math.random() * 200) + 50;
+                player.money += stolen;
+                log(`HACK SUCCESS! Stolen: ${stolen}$`);
+                tg.HapticFeedback.notificationOccurred('success');
+                
+                // Сброс
+                pvpActive = false;
+                document.getElementById('hack-controls').style.display = 'none';
+                document.getElementById('btn-search-victim').style.display = 'block';
+                document.getElementById('pvp-status').innerText = "Соединение разорвано.";
+            }
+            updateUI();
+        }
+
+        // --- ФОНОВЫЕ ПРОЦЕССЫ ---
+        function tick() {
+            // Энергия
+            if (player.energy < 100) player.energy += 1;
+            
+            // Майнинг
+            if (player.miners > 0) player.btc += (player.miners * 0.0001);
+            
+            // Курс Битка
+            let change = Math.floor(Math.random() * 200) - 100;
+            btcRate = Math.max(100, btcRate + change);
+            
+            updateUI();
+        }
+
+        // --- СОХРАНЕНИЕ И ВЫХОД ---
+        function saveAndClose() {
+            // Отправляем данные боту (заработанные деньги)
+            // Примечание: Это упрощенная синхронизация. 
+            // В идеале нужно отправлять весь state, но для теста отправим "разницу" или просто текущие деньги
+            // Бот должен уметь это обрабатывать.
+            
+            let data = JSON.stringify({
+                amount: player.money, // Для совместимости с прошлым кодом кликера
+                full_state: player    // Для будущего развития
+            });
+            
             tg.sendData(data);
-        });
-
-        function randomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+            tg.close();
         }
+
+        // Старт
+        init();
     </script>
 </body>
 </html>
