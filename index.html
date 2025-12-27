@@ -3,459 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hacker OS v3.0</title>
+    <title>ТАМОГОЧИ OS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* --- СТИЛИ (CSS) --- */
         :root {
-            --bg: #050505;
-            --panel: #0a0a0a;
-            --primary: #00ff00;
-            --danger: #ff0000;
-            --dim: #004400;
-            --text: #e0e0e0;
+            --bg-color: #0a0b1e; /* Глубокий темно-синий фон */
+            --primary-neon: #00ff9d; /* Неоновый зеленый */
+            --secondary-neon: #00d2ff; /* Неоновый голубой */
+            --text-color: #e0e0ff;
+            --card-bg: rgba(16, 20, 45, 0.8); /* Полупрозрачный фон для карточек */
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Courier New', monospace;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(0, 255, 157, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 157, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px; /* Эффект сетки */
+            color: var(--text-color);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
             user-select: none;
-            -webkit-user-select: none;
         }
 
-        /* Верхний бар (Статы) */
-        .status-bar {
-            background: var(--panel);
-            border-bottom: 1px solid var(--primary);
-            padding: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            font-size: 12px;
-            gap: 5px;
-            z-index: 10;
+        /* Эффект сканирования экрана (Scanline) */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 99;
         }
-        .stat-item { color: var(--primary); font-weight: bold; }
 
-        /* Область контента */
-        #content-area {
+        .container {
+            padding: 20px;
             flex-grow: 1;
-            overflow-y: auto;
-            padding: 15px;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
-        /* Экраны (Скрываем все, кроме активного) */
-        .screen { display: none; animation: fadeIn 0.3s; }
-        .screen.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Заголовки */
-        h2 {
-            border-bottom: 1px dashed var(--primary);
-            color: var(--primary);
-            margin-top: 0;
-            padding-bottom: 5px;
-            text-transform: uppercase;
-            font-size: 18px;
-        }
-
-        /* Кнопки */
-        button {
-            background: var(--dim);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 12px;
-            font-family: inherit;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            transition: 0.1s;
-        }
-        button:active { background: var(--primary); color: black; transform: scale(0.98); }
-        button.danger { border-color: var(--danger); color: var(--danger); background: #330000; }
-        button.danger:active { background: var(--danger); color: white; }
-
-        /* Полоски прогресса */
-        .progress-container {
-            width: 100%; background: #222; height: 20px; border: 1px solid #555;
-            margin: 10px 0; position: relative;
-        }
-        .progress-fill {
-            height: 100%; background: var(--primary); width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        /* Карточки (в магазине/компании) */
-        .card {
-            border: 1px solid #333;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: rgba(0, 255, 0, 0.05);
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
-        .card span { font-size: 14px; }
-        .card button { width: auto; margin: 0; padding: 5px 10px; font-size: 12px; }
+        .app-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--primary-neon);
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+        }
+        .user-tag {
+             font-size: 14px;
+             color: var(--secondary-neon);
+             background: rgba(0, 210, 255, 0.1);
+             padding: 5px 10px;
+             border-radius: 12px;
+             border: 1px solid var(--secondary-neon);
+        }
 
-        /* Нижнее меню */
-        .nav-bar {
-            background: var(--panel);
-            border-top: 1px solid var(--primary);
+        /* --- ГЛАВНЫЙ АВАТАР (ТАМОГОЧИ) --- */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .avatar-container {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,157,0.2) 0%, rgba(10,11,30,1) 70%);
+            border: 3px solid var(--primary-neon);
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.4), inset 0 0 15px rgba(0, 255, 157, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Анимация "дыхания" аватара */
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 30px var(--primary-neon);
+            animation: pulse 3s infinite ease-in-out;
+            opacity: 0.5;
+        }
+
+        /* Заглушка для изображения аватара (можно заменить на <img>) */
+        .avatar-placeholder i {
+            font-size: 70px;
+            color: var(--primary-neon);
+            filter: drop-shadow(0 0 10px var(--primary-neon));
+        }
+
+        /* Индикаторы состояния вокруг аватара */
+        .status-ring {
+            position: absolute;
+            bottom: -10px;
+            background: var(--card-bg);
+            border: 1px solid var(--primary-neon);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* --- СТАТИСТИКА --- */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            padding: 5px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
         }
-        .nav-btn {
-            background: transparent; border: none;
-            color: #555; font-size: 20px; padding: 10px 0;
+        .stat-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s;
         }
-        .nav-btn.active { color: var(--primary); text-shadow: 0 0 5px var(--primary); }
+        .stat-card:active { transform: scale(0.98); }
+        .stat-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            width: 40px; height: 40px;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+        .stat-info div:first-child { font-size: 12px; opacity: 0.7; }
+        .stat-info div:last-child { font-size: 18px; font-weight: bold; letter-spacing: 0.5px;}
 
-        /* Консоль логов */
-        #console {
-            font-size: 10px; color: #888;
-            border-top: 1px dashed #333;
-            margin-top: 20px; padding-top: 5px;
-            height: 60px; overflow-y: scroll;
+        .money-stat { color: #ffd700; }
+        .money-stat .stat-icon { color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        .btc-stat { color: #f7931a; }
+        .btc-stat .stat-icon { color: #f7931a; box-shadow: 0 0 10px rgba(247, 147, 26, 0.2); }
+
+        /* --- ГЛАВНОЕ МЕНЮ (СЕТКА КНОПОК) --- */
+        .menu-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            flex-grow: 1; /* Занимает оставшееся место */
+        }
+
+        .menu-btn {
+            background: linear-gradient(145deg, rgba(16, 20, 45, 0.9), rgba(10, 11, 30, 0.9));
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            border-radius: 20px;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Эффект свечения при наведении/нажатии */
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.1), transparent);
+            transition: 0.5s;
+        }
+        .menu-btn:hover::before { left: 100%; }
+        
+        .menu-btn:active {
+            transform: scale(0.95);
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--secondary-neon);
+            filter: drop-shadow(0 0 5px var(--secondary-neon));
+        }
+        .btn-label {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Цветовые акценты для разных кнопок */
+        .btn-work .btn-icon { color: var(--primary-neon); filter: drop-shadow(0 0 5px var(--primary-neon)); }
+        .btn-hack .btn-icon { color: #ff3333; filter: drop-shadow(0 0 5px #ff3333); }
+        .btn-shop .btn-icon { color: #ff00ff; filter: drop-shadow(0 0 5px #ff00ff); }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 157, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
         }
     </style>
 </head>
 <body>
 
-    <div class="status-bar">
-        <div class="stat-item" id="ui-money">💵 0$</div>
-        <div class="stat-item" id="ui-energy">⚡ 100%</div>
-        <div class="stat-item" id="ui-btc">₿ 0.00</div>
-    </div>
+    <div class="container">
+        <header class="header">
+            <div class="app-title">ТАМОГОЧИ OS <i class="fa-solid fa-microchip"></i></div>
+            <div class="user-tag" id="username">Hacker_One</div>
+        </header>
 
-    <div id="content-area">
-
-        <div id="screen-work" class="screen active">
-            <h2>💻 Freelance Terminal</h2>
-            <div class="card">
-                <span>Проект: <b id="job-name">Взлом Wi-Fi</b></span>
-                <span id="job-reward">Reward: 50$</span>
-            </div>
-            
-            <div class="progress-container">
-                <div id="work-bar" class="progress-fill"></div>
-            </div>
-            
-            <button onclick="doWork()" style="height: 60px; font-size: 20px;">🔨 TAP TO CODE</button>
-            
-            <div id="console"></div>
-        </div>
-
-        <div id="screen-company" class="screen">
-            <h2>🏢 My Evil Corp</h2>
-            <p>Пассивный доход: <b id="company-income">0</b>$/сек</p>
-            
-            <div id="employees-list">
+        <section class="hero-section">
+            <div class="avatar-container">
+                <div class="avatar-placeholder">
+                    <i class="fa-solid fa-robot"></i>
                 </div>
+            </div>
+            <div class="status-ring">
+                ⚡ Энергия: <span id="energy-val" style="color: var(--primary-neon)">100%</span>
+            </div>
+        </section>
 
-            <h3>Найм сотрудников</h3>
-            <div class="card">
-                <span>Junior Dev (+2$/c)</span>
-                <button onclick="hire('junior', 1000, 2)">1000$</button>
-            </div>
-            <div class="card">
-                <span>Middle Dev (+10$/c)</span>
-                <button onclick="hire('middle', 5000, 10)">5000$</button>
-            </div>
-            <div class="card">
-                <span>Senior Dev (+50$/c)</span>
-                <button onclick="hire('senior', 20000, 50)">20k$</button>
-            </div>
-        </div>
-
-        <div id="screen-crypto" class="screen">
-            <h2>📈 DarkNet Exchange</h2>
-            <div style="text-align: center; margin-bottom: 10px; border: 1px solid #333; padding: 10px;">
-                1 BTC = <b id="btc-rate" style="color:var(--primary); font-size: 20px;">50000</b>$
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button onclick="trade('buy')">📉 BUY 0.1</button>
-                <button onclick="trade('sell')">📈 SELL 0.1</button>
-            </div>
-
-            <h3>Майнинг ферма</h3>
-            <p>Майнеров: <b id="miners-count">0</b></p>
-            <div class="card">
-                <span>ASIC Miner (+0.0001 BTC/s)</span>
-                <button onclick="buyMiner()">2000$</button>
-            </div>
-        </div>
-
-        <div id="screen-pvp" class="screen">
-            <h2>💀 PvP Hacking</h2>
-            
-            <div id="pvp-idle">
-                <p>Поиск уязвимых сетей...</p>
-                <button onclick="startHack()">📡 SCAN NETWORK</button>
-            </div>
-
-            <div id="pvp-active" style="display:none;">
-                <p>Взлом цели: <b id="target-name">User_123</b></p>
-                <p style="font-size: 12px; color: #888">Быстро нажимай BRUTE FORCE!</p>
-                
-                <div class="progress-container" style="border-color: red;">
-                    <div id="hack-bar" class="progress-fill" style="background: red;"></div>
+        <section class="stats-grid">
+            <div class="stat-card money-stat">
+                <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+                <div class="stat-info">
+                    <div>Баланс</div>
+                    <div id="money-val">1,250$</div>
                 </div>
-                
-                <button class="danger" onclick="tapHack()" style="height: 80px; font-size: 20px;">💀 BRUTE FORCE</button>
-                <button onclick="stopHack()" style="margin-top: 10px; font-size: 12px;">ОТМЕНА</button>
             </div>
-        </div>
-
-        <div id="screen-settings" class="screen">
-            <h2>💾 System</h2>
-            <p>Баланс банка: <b id="bank-val">0</b>$</p>
-            <div class="card">
-                <input type="number" id="bank-in" placeholder="Сумма" style="width: 50px; background: black; color: white; border: 1px solid green;">
-                <button onclick="bankDep()">Dep</button>
-                <button onclick="bankWith()">With</button>
+            <div class="stat-card btc-stat">
+                <div class="stat-icon"><i class="fa-brands fa-bitcoin"></i></div>
+                <div class="stat-info">
+                    <div>Крипто</div>
+                    <div id="btc-val">0.045 BTC</div>
+                </div>
             </div>
-            <br>
-            <button onclick="saveData()">💾 SAVE & CLOSE</button>
-            <p style="font-size: 10px; text-align: center;">Данные будут отправлены боту.</p>
-        </div>
+        </section>
 
-    </div>
+        <div class="menu-title">// SELECT MODULE //</div>
+        <nav class="menu-grid">
+            <div class="menu-btn btn-work" onclick="openSection('work')">
+                <i class="btn-icon fa-solid fa-laptop-code"></i>
+                <span class="btn-label">РАБОТА</span>
+            </div>
+            <div class="menu-btn" onclick="openSection('company')">
+                <i class="btn-icon fa-solid fa-building"></i>
+                <span class="btn-label">СТУДИЯ</span>
+            </div>
+            <div class="menu-btn btn-hack" onclick="openSection('pvp')">
+                <i class="btn-icon fa-solid fa-mask"></i>
+                <span class="btn-label">PvP ВЗЛОМ</span>
+            </div>
+            <div class="menu-btn" onclick="openSection('bank')">
+                <i class="btn-icon fa-solid fa-landmark-dome"></i>
+                <span class="btn-label">БАНК</span>
+            </div>
+            <div class="menu-btn" onclick="openSection('crypto')">
+                <i class="btn-icon fa-solid fa-chart-line"></i>
+                <span class="btn-label">БИРЖА</span>
+            </div>
+            <div class="menu-btn btn-shop" onclick="openSection('shop')">
+                <i class="btn-icon fa-solid fa-cart-shopping"></i>
+                <span class="btn-label">МАГАЗИН</span>
+            </div>
+        </nav>
 
-    <div class="nav-bar">
-        <button class="nav-btn active" onclick="nav('work')">💻</button>
-        <button class="nav-btn" onclick="nav('company')">🏢</button>
-        <button class="nav-btn" onclick="nav('crypto')">📈</button>
-        <button class="nav-btn" onclick="nav('pvp')">💀</button>
-        <button class="nav-btn" onclick="nav('settings')">💾</button>
     </div>
 
     <script>
+        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+        tg.expand(); // Раскрыть на весь экран
 
-        // --- СОСТОЯНИЕ ИГРЫ ---
-        let player = {
-            money: 500,
-            energy: 100,
-            btc: 0.0,
-            bank: 0,
-            miners: 0,
-            employees: { junior: 0, middle: 0, senior: 0 }
-        };
+        // Установка цветов под тему Телеграм (по желанию, сейчас используется своя темная тема)
+        // tg.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-color'));
 
-        // Настройки
-        let btcRate = 50000;
-        let workProgress = 0;
-        let hackProgress = 0;
-        let isHacking = false;
-
-        // --- СИСТЕМНЫЕ ФУНКЦИИ ---
-        function nav(screen) {
-            // Переключение экранов
-            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            document.getElementById(`screen-${screen}`).classList.add('active');
-            
-            // Подсветка кнопок
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        // Получаем имя пользователя, если доступно
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        function updateUI() {
-            // Статы
-            document.getElementById('ui-money').innerText = `💵 ${Math.floor(player.money)}`;
-            document.getElementById('ui-energy').innerText = `⚡ ${Math.floor(player.energy)}%`;
-            document.getElementById('ui-btc').innerText = `₿ ${player.btc.toFixed(4)}`;
-            
-            // Компания
-            let income = (player.employees.junior * 2) + (player.employees.middle * 10) + (player.employees.senior * 50);
-            document.getElementById('company-income').innerText = income;
-
-            // Крипта
-            document.getElementById('btc-rate').innerText = Math.floor(btcRate);
-            document.getElementById('miners-count').innerText = player.miners;
-
-            // Банк
-            document.getElementById('bank-val').innerText = player.bank;
-        }
-
-        function log(msg) {
-            let div = document.createElement('div');
-            div.innerText = `> ${msg}`;
-            document.getElementById('console').prepend(div);
-        }
-
-        // --- РАБОТА (КЛИКЕР) ---
-        function doWork() {
-            if (player.energy < 1) { tg.HapticFeedback.notificationOccurred('error'); return; }
-            
-            player.energy -= 1;
-            workProgress += 10;
+        // Функция заглушка для перехода по разделам
+        function openSection(sectionName) {
+            // Вибрация при нажатии
             tg.HapticFeedback.impactOccurred('light');
-
-            document.getElementById('work-bar').style.width = workProgress + "%";
-
-            if (workProgress >= 100) {
-                let reward = Math.floor(Math.random() * 50) + 30;
-                player.money += reward;
-                workProgress = 0;
-                document.getElementById('work-bar').style.width = "0%";
-                log(`Заказ выполнен: +${reward}$`);
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-            updateUI();
-        }
-
-        // --- КОМПАНИЯ ---
-        function hire(type, cost, income) {
-            if (player.money >= cost) {
-                player.money -= cost;
-                player.employees[type]++;
-                log(`Нанят ${type} dev`);
-                renderEmployees();
-                updateUI();
-                tg.HapticFeedback.impactOccurred('medium');
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
-            }
-        }
-
-        function renderEmployees() {
-            let html = "";
-            if (player.employees.junior > 0) html += `<div class="card"><span>Juniors: ${player.employees.junior}</span></div>`;
-            if (player.employees.middle > 0) html += `<div class="card"><span>Middles: ${player.employees.middle}</span></div>`;
-            if (player.employees.senior > 0) html += `<div class="card"><span>Seniors: ${player.employees.senior}</span></div>`;
-            document.getElementById('employees-list').innerHTML = html;
-        }
-
-        // --- КРИПТА ---
-        function trade(type) {
-            let cost = btcRate * 0.1;
-            if (type === 'buy') {
-                if (player.money >= cost) {
-                    player.money -= cost; player.btc += 0.1;
-                    log(`Bought 0.1 BTC (-${Math.floor(cost)}$)`);
-                }
-            } else {
-                if (player.btc >= 0.1) {
-                    player.btc -= 0.1; player.money += cost;
-                    log(`Sold 0.1 BTC (+${Math.floor(cost)}$)`);
-                }
-            }
-            updateUI();
-        }
-
-        function buyMiner() {
-            if (player.money >= 2000) {
-                player.money -= 2000; player.miners++;
-                log("Майнер установлен");
-                updateUI();
-            }
-        }
-
-        // --- PVP ВЗЛОМ (МИНИ ИГРА) ---
-        function startHack() {
-            if (player.energy < 20) { log("Мало энергии (нужно 20)"); return; }
+            console.log('Opening section:', sectionName);
+            // Здесь в будущем будет логика переключения экранов
+            // Например: document.getElementById('main-menu').style.display = 'none';
+            //           document.getElementById(sectionName + '-screen').style.display = 'block';
             
-            document.getElementById('pvp-idle').style.display = 'none';
-            document.getElementById('pvp-active').style.display = 'block';
-            document.getElementById('target-name').innerText = "User_" + Math.floor(Math.random() * 9999);
-            
-            isHacking = true;
-            hackProgress = 0;
-            document.getElementById('hack-bar').style.width = "0%";
-            
-            // Таймер провала (нужно успеть за 5 секунд)
-            setTimeout(() => {
-                if (isHacking) {
-                    log("Взлом провален! Вас засекли.");
-                    stopHack();
-                }
-            }, 5000);
+            // Для демонстрации покажем алерт (в реальном приложении их лучше избегать)
+             // alert("Переход в модуль: " + sectionName.toUpperCase());
         }
 
-        function tapHack() {
-            if (!isHacking) return;
-            hackProgress += 8; // Сложность взлома
-            document.getElementById('hack-bar').style.width = hackProgress + "%";
-            tg.HapticFeedback.impactOccurred('medium');
-
-            if (hackProgress >= 100) {
-                isHacking = false;
-                let stolen = Math.floor(Math.random() * 300) + 100;
-                player.money += stolen;
-                log(`ВЗЛОМ УСПЕШЕН! Украдено: ${stolen}$`);
-                tg.HapticFeedback.notificationOccurred('success');
-                stopHack();
-            }
-        }
-
-        function stopHack() {
-            isHacking = false;
-            document.getElementById('pvp-idle').style.display = 'block';
-            document.getElementById('pvp-active').style.display = 'none';
-            updateUI();
-        }
-
-        // --- БАНК ---
-        function bankDep() {
-            let val = parseInt(document.getElementById('bank-in').value);
-            if (val > 0 && player.money >= val) {
-                player.money -= val; player.bank += val;
-                updateUI();
-            }
-        }
-        function bankWith() {
-            let val = parseInt(document.getElementById('bank-in').value);
-            if (val > 0 && player.bank >= val) {
-                player.bank -= val; player.money += val;
-                updateUI();
-            }
-        }
-
-        // --- ИГРОВОЙ ЦИКЛ (1 СЕКУНДА) ---
-        setInterval(() => {
-            // Энергия
-            if (player.energy < 100) player.energy += 1;
-
-            // Курс битка
-            btcRate = Math.max(100, btcRate + (Math.random() * 400 - 200));
-
-            // Пассивный доход (Компания)
-            let income = (player.employees.junior * 2) + (player.employees.middle * 10) + (player.employees.senior * 50);
-            player.money += income;
-
-            // Майнинг
-            if (player.miners > 0) player.btc += (player.miners * 0.0001);
-
-            updateUI();
-        }, 1000);
-
-        // --- СОХРАНЕНИЕ ---
-        function saveData() {
-            // Отправляем данные боту
-            let data = JSON.stringify({
-                money: player.money,
-                // В будущем можно передать всё состояние, если бот умеет его парсить
-            });
-            tg.sendData(data);
-        }
-
-        // Старт
-        updateUI();
+        // --- Демонстрация обновления данных (можно удалить) ---
+        // В реальности эти данные будут приходить от вашего Python-бота
+        setTimeout(() => {
+             document.getElementById('money-val').innerText = "1,500$";
+             document.getElementById('energy-val').innerText = "98%";
+        }, 2000);
 
     </script>
 </body>
