@@ -3,336 +3,626 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ТАМОГОЧИ OS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Hacker Life OS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* --- СТИЛИ ОСТАЛИСЬ ПРЕЖНИМИ (КРАСИВЫМИ) --- */
         :root {
-            --bg-color: #0a0b1e; /* Глубокий темно-синий фон */
-            --primary-neon: #00ff9d; /* Неоновый зеленый */
-            --secondary-neon: #00d2ff; /* Неоновый голубой */
-            --text-color: #e0e0ff;
-            --card-bg: rgba(16, 20, 45, 0.8); /* Полупрозрачный фон для карточек */
+            --bg-color: #050510;
+            --card-bg: rgba(20, 25, 50, 0.9);
+            --primary: #00ff9d; 
+            --secondary: #00d2ff;
+            --danger: #ff3333;
+            --warning: #ffd700;
+            --text-main: #e0e0ff;
+            --text-muted: #8a8aab;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0;
+            font-family: 'Courier New', monospace;
             background-color: var(--bg-color);
             background-image: 
-                linear-gradient(rgba(0, 255, 157, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 157, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px; /* Эффект сетки */
-            color: var(--text-color);
-            min-height: 100vh;
+                linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            user-select: none;
+            overflow: hidden;
         }
+        .hidden { display: none !important; }
+        .text-green { color: var(--primary); }
+        .text-blue { color: var(--secondary); }
+        .text-red { color: var(--danger); }
+        .text-gold { color: var(--warning); }
+        
+        button { border: none; outline: none; cursor: pointer; font-family: inherit; }
 
-        /* Эффект сканирования экрана (Scanline) */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
-            pointer-events: none;
-            z-index: 99;
-        }
-
-        .container {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
         .header {
+            padding: 15px;
+            background: rgba(5, 5, 16, 0.95);
+            border-bottom: 1px solid var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.1);
+            z-index: 10;
         }
-        .app-title {
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: var(--primary-neon);
-            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-        }
-        .user-tag {
-             font-size: 14px;
-             color: var(--secondary-neon);
-             background: rgba(0, 210, 255, 0.1);
-             padding: 5px 10px;
-             border-radius: 12px;
-             border: 1px solid var(--secondary-neon);
-        }
+        .user-info { font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .level-badge { background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; }
 
-        /* --- ГЛАВНЫЙ АВАТАР (ТАМОГОЧИ) --- */
-        .hero-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .avatar-container {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,255,157,0.2) 0%, rgba(10,11,30,1) 70%);
-            border: 3px solid var(--primary-neon);
-            box-shadow: 0 0 25px rgba(0, 255, 157, 0.4), inset 0 0 15px rgba(0, 255, 157, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Анимация "дыхания" аватара */
-        .avatar-container::before {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            box-shadow: 0 0 30px var(--primary-neon);
-            animation: pulse 3s infinite ease-in-out;
-            opacity: 0.5;
-        }
-
-        /* Заглушка для изображения аватара (можно заменить на <img>) */
-        .avatar-placeholder i {
-            font-size: 70px;
-            color: var(--primary-neon);
-            filter: drop-shadow(0 0 10px var(--primary-neon));
-        }
-
-        /* Индикаторы состояния вокруг аватара */
-        .status-ring {
-            position: absolute;
-            bottom: -10px;
-            background: var(--card-bg);
-            border: 1px solid var(--primary-neon);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        /* --- СТАТИСТИКА --- */
-        .stats-grid {
+        .stats-bar {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            padding: 10px;
+            background: rgba(255,255,255,0.02);
         }
-        .stat-card {
+        .stat-item {
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            transition: transform 0.2s;
-        }
-        .stat-card:active { transform: scale(0.98); }
-        .stat-icon {
-            font-size: 24px;
-            margin-right: 15px;
-            width: 40px; height: 40px;
-            display: flex; justify-content: center; align-items: center;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-        }
-        .stat-info div:first-child { font-size: 12px; opacity: 0.7; }
-        .stat-info div:last-child { font-size: 18px; font-weight: bold; letter-spacing: 0.5px;}
-
-        .money-stat { color: #ffd700; }
-        .money-stat .stat-icon { color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-        .btc-stat { color: #f7931a; }
-        .btc-stat .stat-icon { color: #f7931a; box-shadow: 0 0 10px rgba(247, 147, 26, 0.2); }
-
-        /* --- ГЛАВНОЕ МЕНЮ (СЕТКА КНОПОК) --- */
-        .menu-title {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            opacity: 0.8;
+            padding: 8px;
+            border-radius: 8px;
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+        }
+        .stat-val { font-size: 14px; font-weight: bold; margin-top: 2px; }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; 
+            position: relative;
         }
 
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            flex-grow: 1; /* Занимает оставшееся место */
+        .section-title {
+            font-size: 18px;
+            border-left: 3px solid var(--primary);
+            padding-left: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
         }
 
-        .menu-btn {
-            background: linear-gradient(145deg, rgba(16, 20, 45, 0.9), rgba(10, 11, 30, 0.9));
-            border: 1px solid rgba(0, 255, 157, 0.2);
-            border-radius: 20px;
-            padding: 20px 15px;
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 255, 157, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        .card h3 { margin: 0 0 10px 0; font-size: 16px; color: var(--secondary); }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(0, 255, 157, 0.1); color: var(--primary); border: 1px solid var(--primary); }
+        .btn-primary:active { background: var(--primary); color: #000; }
+        .btn-secondary { background: rgba(0, 210, 255, 0.1); color: var(--secondary); border: 1px solid var(--secondary); }
+        .btn-secondary:active { background: var(--secondary); color: #000; }
+        .btn-danger { background: rgba(255, 51, 51, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .shop-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .shop-icon { font-size: 24px; margin-bottom: 5px; }
+        .shop-price { font-size: 12px; color: var(--warning); margin: 5px 0; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(5, 5, 16, 0.95);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            color: var(--text-muted);
+            font-size: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 4px;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 20%;
+            transition: 0.2s;
+        }
+        .nav-item i { font-size: 18px; }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
+        @keyframes scanline { 0% { top: -100%; } 100% { top: 100%; } }
+        .scanline::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+            background: rgba(0, 255, 157, 0.3); opacity: 0.4; animation: scanline 4s linear infinite;
         }
 
-        /* Эффект свечения при наведении/нажатии */
-        .menu-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.1), transparent);
-            transition: 0.5s;
+        .toast {
+            position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 255, 157, 0.9); color: #000; padding: 8px 16px;
+            border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 100;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
-        .menu-btn:hover::before { left: 100%; }
         
-        .menu-btn:active {
-            transform: scale(0.95);
-            border-color: var(--primary-neon);
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
-        }
-
-        .btn-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-            color: var(--secondary-neon);
-            filter: drop-shadow(0 0 5px var(--secondary-neon));
-        }
-        .btn-label {
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* Цветовые акценты для разных кнопок */
-        .btn-work .btn-icon { color: var(--primary-neon); filter: drop-shadow(0 0 5px var(--primary-neon)); }
-        .btn-hack .btn-icon { color: #ff3333; filter: drop-shadow(0 0 5px #ff3333); }
-        .btn-shop .btn-icon { color: #ff00ff; filter: drop-shadow(0 0 5px #ff00ff); }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
-            50% { box-shadow: 0 0 40px rgba(0, 255, 157, 0.5); }
-            100% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
+        /* Лоадер */
+        #loader {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: var(--bg-color); z-index: 999;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--primary); font-size: 20px;
         }
     </style>
 </head>
-<body>
+<body class="scanline">
 
-    <div class="container">
-        <header class="header">
-            <div class="app-title">ТАМОГОЧИ OS <i class="fa-solid fa-microchip"></i></div>
-            <div class="user-tag" id="username">Hacker_One</div>
-        </header>
+    <div id="loader">CONNECTING TO MAINFRAME...</div>
 
-        <section class="hero-section">
-            <div class="avatar-container">
-                <div class="avatar-placeholder">
-                    <i class="fa-solid fa-robot"></i>
+    <header class="header">
+        <div class="user-info">
+            <span class="level-badge">LVL <span id="lvl-val">1</span></span>
+            <span id="username">Hacker</span>
+        </div>
+        <div id="save-status" style="font-size: 10px; opacity: 0.5;">SYNCED</div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-item text-gold">
+            <i class="fa-solid fa-dollar-sign"></i>
+            <div class="stat-val" id="money-val">0</div>
+        </div>
+        <div class="stat-item text-green">
+            <i class="fa-solid fa-bolt"></i>
+            <div class="stat-val"><span id="energy-val">0</span>%</div>
+        </div>
+        <div class="stat-item text-blue">
+            <i class="fa-brands fa-bitcoin"></i>
+            <div class="stat-val" id="btc-val">0.000</div>
+        </div>
+    </div>
+
+    <div class="content">
+        
+        <div id="screen-home" class="screen">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 50px; color: var(--primary); margin-bottom: 10px;">
+                    <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <h3>Системный статус</h3>
+                <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 12px;">
+                    <div>💻 Серверы: <span id="servers-val" class="text-green">0</span></div>
+                    <div>⛏ Майнеры: <span id="miners-val" class="text-blue">0</span></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px;">
+                    <div>🛡 Защита: <span id="def-val" class="text-green">0</span></div>
+                    <div>⚔ Навык: <span id="skill-val" class="text-red">1</span></div>
                 </div>
             </div>
-            <div class="status-ring">
-                ⚡ Энергия: <span id="energy-val" style="color: var(--primary-neon)">100%</span>
-            </div>
-        </section>
 
-        <section class="stats-grid">
-            <div class="stat-card money-stat">
-                <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
-                <div class="stat-info">
-                    <div>Баланс</div>
-                    <div id="money-val">1,250$</div>
+            <div class="section-title">Апгрейды</div>
+            <div class="card">
+                <h3><i class="fa-solid fa-server"></i> Сервер</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Пассивный доход: +0.5$/сек</p>
+                <button class="btn btn-secondary" onclick="buyUpgrade('server')">
+                    Купить (<span id="price-server">100</span>$)
+                </button>
+            </div>
+            <div class="card">
+                <h3><i class="fa-brands fa-bitcoin"></i> ASIC Miner</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Майнит BTC</p>
+                <button class="btn btn-secondary" onclick="buyUpgrade('miner')">
+                    Купить (<span id="price-miner">2000</span>$)
+                </button>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-shield-halved"></i> Firewall</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Защита от PvP</p>
+                <button class="btn btn-secondary" onclick="buyUpgrade('firewall')">
+                    Купить (<span id="price-firewall">500</span>$)
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-work" class="screen hidden">
+            <div class="section-title">Текущая задача</div>
+            
+            <div id="no-project-view">
+                <div class="card" style="text-align: center; padding: 30px;">
+                    <i class="fa-solid fa-mug-hot" style="font-size: 40px; color: var(--text-muted); margin-bottom: 10px;"></i>
+                    <p>Нет активных проектов</p>
+                    <p style="font-size: 12px; color: gray;">Возьмите заказ в меню бота "Работа"</p>
+                    <button class="btn btn-secondary" onclick="tg.close()">
+                        В БОТА
+                    </button>
                 </div>
             </div>
-            <div class="stat-card btc-stat">
-                <div class="stat-icon"><i class="fa-brands fa-bitcoin"></i></div>
-                <div class="stat-info">
-                    <div>Крипто</div>
-                    <div id="btc-val">0.045 BTC</div>
+
+            <div id="active-project-view" class="hidden">
+                <div class="card">
+                    <h3 id="project-name">Проект</h3>
+                    <div class="progress-container">
+                        <div class="progress-fill" id="project-bar" style="width: 0%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <span>Прогресс: <span id="project-progress">0</span>/<span id="project-goal">100</span></span>
+                        <span class="text-gold">Награда: <span id="project-reward">0</span>$</span>
+                    </div>
+                    <button class="btn btn-primary" id="btn-code" onclick="doWork()">
+                        <i class="fa-solid fa-code"></i> ПИСАТЬ КОД (-5 ⚡)
+                    </button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <div class="menu-title">// SELECT MODULE //</div>
-        <nav class="menu-grid">
-            <div class="menu-btn btn-work" onclick="openSection('work')">
-                <i class="btn-icon fa-solid fa-laptop-code"></i>
-                <span class="btn-label">РАБОТА</span>
+        <div id="screen-pvp" class="screen hidden">
+            <div class="section-title">DarkNet Access</div>
+            
+            <div id="hack-search-view">
+                <div class="card">
+                    <h3>Поиск цели</h3>
+                    <p style="font-size: 12px; color: var(--text-muted);">Требуется 30 энергии для сканирования сети.</p>
+                    <button class="btn btn-danger" onclick="pvpScan()">
+                        <i class="fa-solid fa-radar"></i> СКАНИРОВАТЬ (-30 ⚡)
+                    </button>
+                </div>
             </div>
-            <div class="menu-btn" onclick="openSection('company')">
-                <i class="btn-icon fa-solid fa-building"></i>
-                <span class="btn-label">СТУДИЯ</span>
+
+            <div id="hack-process-view" class="hidden">
+                <div class="card" style="border-color: var(--danger);">
+                    <h3 class="text-red"><i class="fa-solid fa-crosshairs"></i> Цель: <span id="victim-name">...</span></h3>
+                    <div class="progress-container">
+                        <div class="progress-fill" id="hack-bar" style="width: 0%; background: var(--danger); box-shadow: 0 0 10px var(--danger);"></div>
+                    </div>
+                    <p style="text-align: center; font-size: 12px;">Brute Force Attack...</p>
+                    <button class="btn btn-danger" onclick="pvpAttack()">
+                        <i class="fa-solid fa-skull"></i> ВЗЛОМАТЬ
+                    </button>
+                </div>
             </div>
-            <div class="menu-btn btn-hack" onclick="openSection('pvp')">
-                <i class="btn-icon fa-solid fa-mask"></i>
-                <span class="btn-label">PvP ВЗЛОМ</span>
+            
+            <div id="hack-win-view" class="hidden">
+                <div class="card">
+                    <h3 class="text-green">Взлом успешен!</h3>
+                    <p>Доступ получен. Вернитесь в бота, чтобы забрать добычу.</p>
+                    <button class="btn btn-primary" onclick="tg.close()">В БОТА</button>
+                </div>
             </div>
-            <div class="menu-btn" onclick="openSection('bank')">
-                <i class="btn-icon fa-solid fa-landmark-dome"></i>
-                <span class="btn-label">БАНК</span>
+        </div>
+
+        <div id="screen-bank" class="screen hidden">
+            <div class="section-title">Финансы</div>
+            <div class="card">
+                <h3><i class="fa-solid fa-building-columns"></i> Оффшорный Банк</h3>
+                <p class="text-muted" style="font-size: 11px;">Баланс: <span id="bank-balance" class="text-gold">0</span>$</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="bank-input" placeholder="Сумма" style="width: 60%; background: #000; border: 1px solid #333; color: #fff; padding: 5px; border-radius: 5px;">
+                    <button class="btn btn-primary" style="margin:0; width: 40%; font-size: 10px;" onclick="bankAction('dep')">Внести</button>
+                </div>
+                <button class="btn btn-secondary" style="margin-top: 5px; font-size: 10px;" onclick="bankAction('with')">Снять</button>
             </div>
-            <div class="menu-btn" onclick="openSection('crypto')">
-                <i class="btn-icon fa-solid fa-chart-line"></i>
-                <span class="btn-label">БИРЖА</span>
+        </div>
+
+        <div id="screen-shop" class="screen hidden">
+            <div class="section-title">Черный рынок</div>
+            <div class="shop-grid">
+                <div class="shop-item" onclick="buyItem('coffee')">
+                    <div class="shop-icon">☕</div>
+                    <div>Кофе</div>
+                    <div class="shop-price">40$ (+30⚡)</div>
+                </div>
+                <div class="shop-item" onclick="buyItem('sandwich')">
+                    <div class="shop-icon">🥪</div>
+                    <div>Сэндвич</div>
+                    <div class="shop-price">90$ (+60⚡)</div>
+                </div>
+                <div class="shop-item" onclick="buyItem('pizza')">
+                    <div class="shop-icon">🍕</div>
+                    <div>Пицца</div>
+                    <div class="shop-price">200$ (+100⚡)</div>
+                </div>
+                <div class="shop-item" onclick="buyItem('energy_drink')">
+                    <div class="shop-icon">⚡</div>
+                    <div>Энергетик</div>
+                    <div class="shop-price">150$ (+80⚡)</div>
+                </div>
             </div>
-            <div class="menu-btn btn-shop" onclick="openSection('shop')">
-                <i class="btn-icon fa-solid fa-cart-shopping"></i>
-                <span class="btn-label">МАГАЗИН</span>
-            </div>
-        </nav>
+            
+            <div class="section-title" style="margin-top: 20px;">Инвентарь</div>
+            <div id="inventory-list" class="shop-grid">
+                </div>
+        </div>
 
     </div>
 
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Главная</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('work', this)">
+            <i class="fa-solid fa-terminal"></i>
+            <span>Работа</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('pvp', this)">
+            <i class="fa-solid fa-mask"></i>
+            <span>Взлом</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('bank', this)">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Финансы</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('shop', this)">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Магазин</span>
+        </div>
+    </nav>
+
+    <div id="toast" class="toast">Сообщение</div>
+
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрыть на весь экран
+        tg.expand();
+        
+        // ----------------------------------------------------
+        // !!!!!!!! ВСТАВЬ СЮДА СВОЙ URL ОТ NGROK !!!!!!!!
+        // Пример: const API_BASE_URL = "https://a1b2-95-100-200-50.ngrok-free.app";
+        const API_BASE_URL = "https://ВАШ-ССЫЛКА-ТУТ.ngrok-free.app"; 
+        // ----------------------------------------------------
 
-        // Установка цветов под тему Телеграм (по желанию, сейчас используется своя темная тема)
-        // tg.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-color'));
-
-        // Получаем имя пользователя, если доступно
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+        let userId = 0;
+        // Для тестов в браузере (если не в телеграм)
+        if (!tg.initDataUnsafe?.user) {
+            userId = 423940119; // Твой ID из players_db.json для теста
+        } else {
+            userId = tg.initDataUnsafe.user.id;
         }
 
-        // Функция заглушка для перехода по разделам
-        function openSection(sectionName) {
-            // Вибрация при нажатии
-            tg.HapticFeedback.impactOccurred('light');
-            console.log('Opening section:', sectionName);
-            // Здесь в будущем будет логика переключения экранов
-            // Например: document.getElementById('main-menu').style.display = 'none';
-            //           document.getElementById(sectionName + '-screen').style.display = 'block';
+        async function apiCall(endpoint, data = {}) {
+            document.getElementById('save-status').innerText = "SYNCING...";
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, data: data })
+                });
+                const res = await response.json();
+                document.getElementById('save-status').innerText = "ONLINE";
+                return res;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('save-status').innerText = "OFFLINE";
+                showToast("Ошибка соединения", true);
+                return null;
+            }
+        }
+
+        async function init() {
+            if (tg.initDataUnsafe?.user) {
+                document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+            }
+            // Загрузка данных
+            const res = await apiCall('/get_data');
+            if (res) updateUI(res);
+            document.getElementById('loader').classList.add('hidden');
+        }
+
+        // --- UI UPDATE ---
+        function updateUI(player) {
+            // Stats
+            document.getElementById('money-val').innerText = Math.floor(player.money);
+            document.getElementById('energy-val').innerText = Math.floor(player.energy);
+            document.getElementById('btc-val').innerText = player.btc.toFixed(4);
+            document.getElementById('lvl-val').innerText = player.hacking_skill;
+
+            // Home Stats
+            document.getElementById('servers-val').innerText = player.servers;
+            document.getElementById('miners-val').innerText = player.miners;
+            document.getElementById('def-val').innerText = player.protection;
+            document.getElementById('skill-val').innerText = player.hacking_skill;
             
-            // Для демонстрации покажем алерт (в реальном приложении их лучше избегать)
-             // alert("Переход в модуль: " + sectionName.toUpperCase());
+            // Prices
+            document.getElementById('price-server').innerText = 100 + (player.servers * 80);
+            document.getElementById('price-firewall').innerText = 500 * Math.pow(2, player.protection);
+            document.getElementById('price-miner').innerText = 2000 + (player.miners * 1000);
+
+            // Bank
+            document.getElementById('bank-balance').innerText = Math.floor(player.bank_balance);
+
+            // Project
+            const noProj = document.getElementById('no-project-view');
+            const hasProj = document.getElementById('active-project-view');
+            
+            if (player.current_project) {
+                noProj.classList.add('hidden');
+                hasProj.classList.remove('hidden');
+                document.getElementById('project-name').innerText = player.current_project.name;
+                document.getElementById('project-progress').innerText = Math.floor(player.current_project.progress);
+                document.getElementById('project-goal').innerText = player.current_project.goal;
+                document.getElementById('project-reward').innerText = player.current_project.reward;
+                
+                let pct = (player.current_project.progress / player.current_project.goal) * 100;
+                document.getElementById('project-bar').style.width = pct + "%";
+            } else {
+                noProj.classList.remove('hidden');
+                hasProj.classList.add('hidden');
+            }
+
+            // PvP Status
+            const searchView = document.getElementById('hack-search-view');
+            const hackView = document.getElementById('hack-process-view');
+            const winView = document.getElementById('hack-win-view');
+
+            searchView.classList.add('hidden');
+            hackView.classList.add('hidden');
+            winView.classList.add('hidden');
+
+            if (player.hack_ready_to_loot) {
+                winView.classList.remove('hidden');
+            } else if (player.active_hack) {
+                hackView.classList.remove('hidden');
+                document.getElementById('victim-name').innerText = player.active_hack.victim_name;
+                let pct = (player.active_hack.progress / player.active_hack.goal) * 100;
+                document.getElementById('hack-bar').style.width = pct + "%";
+            } else {
+                searchView.classList.remove('hidden');
+            }
+
+            // Inventory
+            const invList = document.getElementById('inventory-list');
+            invList.innerHTML = '';
+            if (Object.keys(player.inventory).length === 0) {
+                invList.innerHTML = '<div style="grid-column: span 2; text-align: center; color: gray;">Пусто</div>';
+            } else {
+                for (const [key, count] of Object.entries(player.inventory)) {
+                    // Простой маппинг иконок
+                    let icon = "📦";
+                    if(key === 'coffee') icon = "☕";
+                    if(key === 'sandwich') icon = "🥪";
+                    if(key === 'pizza') icon = "🍕";
+                    if(key === 'energy_drink') icon = "⚡";
+                    
+                    let div = document.createElement('div');
+                    div.className = 'shop-item';
+                    div.innerHTML = `<div class="shop-icon">${icon}</div><div>${key} x${count}</div>`;
+                    div.onclick = () => useItem(key);
+                    invList.appendChild(div);
+                }
+            }
         }
 
-        // --- Демонстрация обновления данных (можно удалить) ---
-        // В реальности эти данные будут приходить от вашего Python-бота
-        setTimeout(() => {
-             document.getElementById('money-val').innerText = "1,500$";
-             document.getElementById('energy-val').innerText = "98%";
-        }, 2000);
+        // --- ACTIONS ---
+
+        async function doWork() {
+            tg.HapticFeedback.impactOccurred('medium');
+            const res = await apiCall('/action/work');
+            if(res) {
+                updateUI(res.player);
+                if(res.success) showToast(res.msg);
+                else showToast(res.msg, true);
+            }
+        }
+
+        async function buyItem(item) {
+            tg.HapticFeedback.impactOccurred('light');
+            const res = await apiCall('/action/buy', { item: item });
+            if(res) {
+                updateUI(res.player);
+                showToast(res.msg, !res.success);
+            }
+        }
+
+        async function useItem(item) {
+            tg.HapticFeedback.impactOccurred('light');
+            const res = await apiCall('/action/use', { item: item });
+            if(res) {
+                updateUI(res.player);
+                showToast(res.msg, !res.success);
+            }
+        }
+
+        async function buyUpgrade(type) {
+            tg.HapticFeedback.impactOccurred('medium');
+            const res = await apiCall('/action/upgrade', { type: type });
+            if(res) {
+                updateUI(res.player);
+                showToast(res.msg, !res.success);
+            }
+        }
+
+        async function bankAction(action) {
+            let val = document.getElementById('bank-input').value;
+            if (!val) return;
+            const res = await apiCall('/action/bank', { action: action, amount: val });
+            if(res) {
+                updateUI(res.player);
+                showToast(res.success ? "Успешно" : "Ошибка", !res.success);
+            }
+        }
+
+        async function pvpScan() {
+            const res = await apiCall('/action/pvp_scan');
+            if(res) {
+                if(res.player) updateUI(res.player);
+                if(!res.success) showToast(res.msg, true);
+            }
+        }
+
+        async function pvpAttack() {
+            const res = await apiCall('/action/pvp_attack');
+            if(res) {
+                updateUI(res.player);
+                if(res.res === "FAIL") showToast(res.msg, true);
+            }
+        }
+
+        // --- UTILS ---
+        function switchTab(screenName, navEl) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`screen-${screenName}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navEl.classList.add('active');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function showToast(msg, isError=false) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.background = isError ? 'rgba(255, 51, 51, 0.9)' : 'rgba(0, 255, 157, 0.9)';
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 2000);
+        }
+
+        // Start
+        init();
+        // Обновляем данные каждые 5 секунд (пассивный доход)
+        setInterval(async () => {
+            const res = await apiCall('/get_data');
+            if(res) updateUI(res);
+        }, 5000);
 
     </script>
 </body>
